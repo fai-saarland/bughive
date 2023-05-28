@@ -8,7 +8,7 @@
 #include "bughive/common.h"
 #include "msg/policy_reader.h"
 #include "msg/policy_builder.h"
-#include "msg/policy_verifier.h"
+//#include "msg/policy_verifier.h"
 
 #include <stdio.h>
 #include <nanomsg/nn.h>
@@ -18,8 +18,7 @@
 #define nsfdr(x) FLATBUFFERS_WRAP_NAMESPACE(bughive_fdr, x)
 #define reqtype(X) ns(RequestType_REQ_##X)
 
-static void *resFDRTaskFD(int sock,
-                          flatcc_builder_t *builder,
+static void *resFDRTaskFD(flatcc_builder_t *builder,
                           bughive_policy_req_fdr_task_fd req_fdr_fd,
                           void *userdata,
                           size_t *bufsize)
@@ -43,8 +42,7 @@ static void *resFDRTaskFD(int sock,
     return flatcc_builder_get_direct_buffer(builder, bufsize);
 }
 
-static void *resFDROperator(int sock,
-                            flatcc_builder_t *builder,
+static void *resFDROperator(flatcc_builder_t *builder,
                             bughive_policy_req_fdr_operator req_fn,
                             ns(Request_table_t) req,
                             void *userdata,
@@ -126,15 +124,14 @@ int bughivePolicyServer(const char *url,
                 fprintf(stdout, "Got FDR_TASK_FD request\n");
                 fflush(stdout);
 
-                sendbuf = resFDRTaskFD(sock, &builder, req_fdr_fd, userdata,
-                                       &sendsize);
+                sendbuf = resFDRTaskFD(&builder, req_fdr_fd, userdata, &sendsize);
                 break;
 
             case reqtype(FDR_STATE_OPERATOR):
                 fprintf(stdout, "Got FDR_STATE_OPERATOR request\n");
                 fflush(stdout);
 
-                sendbuf = resFDROperator(sock, &builder, req_fdr_op, req,
+                sendbuf = resFDROperator(&builder, req_fdr_op, req,
                                          userdata, &sendsize);
                 break;
 

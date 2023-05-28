@@ -8,7 +8,7 @@
 #include "bughive/common.h"
 #include "msg/policy_reader.h"
 #include "msg/policy_builder.h"
-#include "msg/policy_verifier.h"
+//#include "msg/policy_verifier.h"
 
 #include <stdio.h>
 #include <assert.h>

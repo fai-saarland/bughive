@@ -1,3 +1,6 @@
 [submodule "third-party/nng"]
 	path = third-party/nng
 	url = https://github.com/nanomsg/nng
+[submodule "third-party/flatbuffers"]
+	path = third-party/flatbuffers
+	url = https://github.com/google/flatbuffers

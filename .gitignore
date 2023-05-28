@@ -12,3 +12,5 @@ __pycache__
 *.pyo
 src/msg/*.h
 test/test_*
+python/msg/
+env/
