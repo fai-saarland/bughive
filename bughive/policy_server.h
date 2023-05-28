@@ -7,35 +7,23 @@
 #ifndef __BUGHIVE_POLICY_SERVER_H__
 #define __BUGHIVE_POLICY_SERVER_H__
 
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-/** Forward declaration */
-typedef struct bughive_policy_server bughive_policy_server_t;
-
-typedef char *(*bughive_policy_req_fdr_fd)(void *userdata);
+typedef char *(*bughive_policy_req_fdr_task_fd)(size_t *size, void *userdata);
 typedef int (*bughive_policy_req_fdr_operator)(const int *state,
                                                void *userdata);
 
 /**
- * Creates a server object with the associated methods.
- */
-bughive_policy_server_t *
-bughivePolicyServerNew(const char *url,
-                       bughive_policy_req_fdr_fd req_fdr_fd,
-                       bughive_policy_req_fdr_operator req_fdr_op,
-                       void *userdata);
-
-/**
- * Deletes allocated memory.
- */
-void bughivePolicyServerDel(bughive_policy_server_t *s);
-
-/**
  * Runs the server and blocks as long as the server is running
  */
-int bughivePolicyServerRun(bughive_policy_server_t *s);
+int bughivePolicyServer(const char *url,
+                        bughive_policy_req_fdr_task_fd req_fdr_fd,
+                        bughive_policy_req_fdr_operator req_fdr_op,
+                        void *userdata);
 
 #ifdef __cplusplus
 }

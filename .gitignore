@@ -11,3 +11,4 @@ __pycache__
 *.pyc
 *.pyo
 src/msg/*.h
+test/test_*

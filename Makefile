@@ -5,8 +5,10 @@ AR ?= ar
 RANLIB ?= ranlib
 CC ?= gcc
 CFLAGS ?=
-LDFLAGS ?=
+LDFLAGS ?= -L. -lbughive -pthread
 
+CFLAGS += -Wall -pedantic
+CFLAGS += -g
 CFLAGS += -I.
 CFLAGS += -Ithird-party/flatcc/include
 CFLAGS += -Ithird-party/nng/include/nng/compat
@@ -17,10 +19,15 @@ DEP += src/msg/flatbuffers_common_reader.h
 DEP += third-party/nng/build/libnng.a
 
 SRC  = policy_server
+SRC += policy_client
 
 OBJS := $(foreach obj,$(SRC),.objs/$(obj).o)
 
-all: libbughive.a
+TESTS  = policy_server
+TESTS += policy_cat_fdr_task_fd
+TESTS := $(foreach t,$(TESTS),test/test_$(t))
+
+all: libbughive.a test
 
 libbughive_standalone.a: $(OBJS) $(MAKE_FILES)
 	rm -f $@
@@ -32,8 +39,13 @@ libbughive.a: libbughive_standalone.a third-party/nng/build/libnng.a third-party
 	$(AR) -rcT $@ $^
 	$(RANLIB) $@
 
+test: $(TESTS)
+
 .objs/%.o: src/%.c bughive/%.h $(DEP)
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+test/test_%: test/%.c libbughive.a
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 src/msg/flatbuffers_common_reader.h: third-party/flatcc/bin/flatcc msg/*.fbs
 	./third-party/flatcc/bin/flatcc -o src/msg -a msg/*.fbs
@@ -43,6 +55,7 @@ src/msg/flatbuffers_common_reader.h: third-party/flatcc/bin/flatcc msg/*.fbs
 clean:
 	rm -f .objs/*.o
 	rm -f src/msg/*.h
+	rm -f $(TESTS)
 
 mrproper: clean third-party-clean
 

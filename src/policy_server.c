@@ -5,81 +5,135 @@
  */
 
 #include "bughive/policy_server.h"
+#include "bughive/common.h"
 #include "msg/policy_reader.h"
+#include "msg/policy_builder.h"
+#include "msg/policy_verifier.h"
 
 #include <stdio.h>
 #include <nanomsg/nn.h>
 #include <nanomsg/reqrep.h>
 
-#define BUGHIVE_BUF_MAX_SIZE (1024 * 1024 * 10)
-#define BUGHIVE_URL_MAX_SIZE 256
+#undef ns
+#define ns(x) FLATBUFFERS_WRAP_NAMESPACE(bughive_policy, x)
+#define reqtype(X) ns(RequestType_REQ_##X)
 
-struct bughive_policy_server {
-    char url[BUGHIVE_URL_MAX_SIZE];
-    int sock;
-    int eid;
 
-    bughive_policy_req_fdr_fd req_fdr_fd;
-    bughive_policy_req_fdr_operator req_fdr_operator;
-    void *userdata;
-};
-
-bughive_policy_server_t *
-bughivePolicyServerNew(const char *url,
-                       bughive_policy_req_fdr_fd req_fdr_fd,
-                       bughive_policy_req_fdr_operator req_fdr_op,
-                       void *userdata)
+static void *resFDRTaskFD(int sock,
+                          flatcc_builder_t *builder,
+                          bughive_policy_req_fdr_task_fd req_fdr_fd,
+                          void *userdata,
+                          size_t *bufsize)
 {
-    if (strlen(url) > BUGHIVE_URL_MAX_SIZE - 1){
-        fprintf(stderr, "Error: url too long\n");
+    size_t size;
+    char *task = req_fdr_fd(&size, userdata);
+    if (task == NULL)
         return NULL;
-    }
 
-    bughive_policy_server_t *s;
-    s = (bughive_policy_server_t *)calloc(1, sizeof(bughive_policy_server_t));
+    flatcc_builder_reset(builder);
+    ns(ResponseFDRTaskFD_start_as_root(builder));
+    ns(ResponseFDRTaskFD_task_create(builder, task, size));
+    ns(ResponseFDRTaskFD_end_as_root(builder));
 
-    strcpy(s->url, url);
-    s->req_fdr_fd = req_fdr_fd;
-    s->req_fdr_operator = req_fdr_op;
-    s->userdata = userdata;
-    return s;
+    free(task);
+    return flatcc_builder_get_direct_buffer(builder, bufsize);
 }
 
-void bughivePolicyServerFree(bughive_policy_server_t *s)
+static void *resFDROperator(int sock,
+                            flatcc_builder_t *builder,
+                            bughive_policy_req_fdr_operator req_fn,
+                            ns(Request_table_t) req,
+                            void *userdata,
+                            size_t *bufsize)
 {
-    free(s);
+    return NULL;
+    /*
+
+    size_t size;
+    char *task = req_fdr_fd(&size, userdata);
+    if (task == NULL)
+        return NULL;
+
+    ns(ResponseFDROperator_start_as_root(builder));
+    ns(ResponseFDROperator_operator_add(builder, op_id));
+    ns(ResponseFDROperator_end_as_root(builder));
+    return flatcc_builder_get_direct_buffer(builder, bufsize);
+    */
 }
 
-int bughivePolicyServerRun(bughive_policy_server_t *s)
+int bughivePolicyServer(const char *url,
+                        bughive_policy_req_fdr_task_fd req_fdr_fd,
+                        bughive_policy_req_fdr_operator req_fdr_op,
+                        void *userdata)
 {
-    if ((s->sock = nn_socket(AF_SP, NN_REP)) < 0){
+    int sock, eid;
+    if ((sock = nn_socket(AF_SP, NN_REP)) < 0){
         fprintf(stderr, "Error: Could not create a socket: %s\n",
                 nn_strerror(nn_errno()));
         return -1;
     }
 
-    if ((s->eid = nn_bind(s->sock, s->url)) < 0){
+    if ((eid = nn_bind(sock, url)) < 0){
         fprintf(stderr, "Error: Could not bind socket to url %s: %s\n",
-                s->url, nn_strerror(nn_errno()));
+                url, nn_strerror(nn_errno()));
         return -1;
     }
 
+    flatcc_builder_t builder;
+    flatcc_builder_init(&builder);
     char *buf = (char *)malloc(BUGHIVE_BUF_MAX_SIZE);
     while (1){
         int buflen = 0;
         // nn_recv(s->sock, &buf, NN_MSG, 0)
-        if ((buflen = nn_recv(s->sock, buf, BUGHIVE_BUF_MAX_SIZE, 0)) < 0){
+        if ((buflen = nn_recv(sock, buf, BUGHIVE_BUF_MAX_SIZE, 0)) < 0){
             fprintf(stderr, "Error: nn_recv: %s\n",
                     nn_strerror(nn_errno()));
             // TODO: Ignore errors for now
             continue;
         }
+        ns(Request_table_t) req;
+        req = ns(Request_as_root(buf));
+        if (req == NULL){
+            fprintf(stderr, "Error: Incorrectly formed received message (size: %d)\n",
+                    buflen);
+            return -1;
+        }
 
-        // TODO: bughive_policy_Request_verify_table()
-        // TODO: Deserialize and dispatch to methods
+        void *sendbuf = NULL;
+        size_t sendsize = 0;
+        switch (ns(Request_request(req))){
+            case reqtype(FDR_TASK_FD):
+                fprintf(stdout, "Got FDR_TASK_FD request\n");
+                fflush(stdout);
 
+                sendbuf = resFDRTaskFD(sock, &builder, req_fdr_fd, userdata,
+                                       &sendsize);
+                break;
+
+            case reqtype(FDR_STATE_OPERATOR):
+                fprintf(stdout, "Got FDR_STATE_OPERATOR request\n");
+                fflush(stdout);
+
+                sendbuf = resFDROperator(sock, &builder, req_fdr_op, req,
+                                         userdata, &sendsize);
+                break;
+
+            default:
+                fprintf(stderr, "Error: Unkown request %d\n",
+                        (int)ns(Request_request(req)));
+                continue;
+        }
+
+        if (sendbuf != NULL){
+            if (nn_send(sock, sendbuf, sendsize, 0) < 0){
+                fprintf(stderr, "Error: Cannot send a message: %s\n",
+                        nn_strerror(nn_errno()));
+                return -1;
+            }
+        }
     }
     free(buf);
+    flatcc_builder_clear(&builder);
 
-    return -1;
+    return 0;
 }

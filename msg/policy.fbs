@@ -10,12 +10,17 @@ include "fdr.fbs";
 namespace bughive.policy;
 
 enum RequestType : int32 {
+    REQ_FDR_TASK_FD,
     REQ_FDR_STATE_OPERATOR,
 }
 
 table Request {
     request:RequestType;
     state:bughive.fdr.State;
+}
+
+table ResponseFDRTaskFD {
+    task:string (required);
 }
 
 table ResponseFDROperator {
