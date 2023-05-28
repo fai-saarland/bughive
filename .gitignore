@@ -10,3 +10,4 @@ Makefile.config
 __pycache__
 *.pyc
 *.pyo
+src/msg/*.h
