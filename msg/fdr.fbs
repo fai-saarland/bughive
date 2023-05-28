@@ -1,0 +1,69 @@
+/***
+ * Copyright (c)2023 Daniel Fiser <danfis@danfis.cz>. All rights reserved.
+ * This file is part of bughive licensed under 3-clause BSD License (see file
+ * LICENSE, or https://opensource.org/licenses/BSD-3-Clause)
+ */
+
+namespace bughive.fdr;
+
+/**
+ * A fact in  is a pair of variable ID and its value.
+ */
+table Fact {
+    var:int32 = -1;
+    val:int32 = -1;
+}
+
+/**
+ * State assigns value to all variables.
+ */
+table State {
+    val:[int32] (required);
+}
+
+/**
+ * Partial state is a set of facts
+ */
+table PartState {
+    fact:[Fact] (required);
+}
+
+/**
+ * Definition of a variable.
+ */
+table Var {
+    // Number of values the variable has. Values are indexed from 0 to range - 1
+    range:int32 = -1;
+    // Name of the variable
+    name:string (required);
+    // Name of each variable-value pair
+    fact_name:[string] (required);
+}
+
+/**
+ * Conditional effect
+ */
+table CondEff {
+    pre:PartState (required);
+    eff:PartState (required);
+}
+
+table Operator {
+    // Unique ID of the operator
+    id:int32 = -1;
+    name:string (required);
+    cost:int32 = -1;
+    pre:PartState (required);
+    eff:PartState (required);
+    cond_eff:[CondEff] (required);
+}
+
+/**
+ * Definition of the FDR planning task
+ */
+table Task {
+    var:[Var] (required);
+    operator:[Operator] (required);
+    init_state:State (required);
+    goal:PartState (required);
+}
