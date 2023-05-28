@@ -11,6 +11,7 @@
 #include "msg/policy_verifier.h"
 
 #include <stdio.h>
+#include <assert.h>
 #include <nanomsg/nn.h>
 #include <nanomsg/reqrep.h>
 
@@ -66,7 +67,6 @@ char *bughivePolicyFDRTaskFD(bughive_policy_t *p)
     ns(Request_start_as_root(&p->builder));
     ns(Request_request_add(&p->builder, reqtype(FDR_TASK_FD)));
     ns(Request_end_as_root(&p->builder));
-    fprintf(stderr, "XXX\n");
 
     size_t sendsize;
     void *sendbuf = flatcc_builder_get_direct_buffer(&p->builder, &sendsize);
@@ -75,8 +75,6 @@ char *bughivePolicyFDRTaskFD(bughive_policy_t *p)
                 nn_strerror(nn_errno()));
         return NULL;
     }
-
-    fprintf(stderr, "Sent\n");
 
     int buflen;
     if ((buflen = nn_recv(p->sock, p->recv_buf, BUGHIVE_BUF_MAX_SIZE, 0)) < 0){
@@ -92,6 +90,10 @@ char *bughivePolicyFDRTaskFD(bughive_policy_t *p)
                 buflen);
         return NULL;
     }
+
+    bughive_Response_table_t status = ns(ResponseFDRTaskFD_response(res));
+    assert(bughive_Response_status(status) == bughive_Status_OK);
+    assert(!bughive_Response_errmsg_is_present(status));
 
     flatbuffers_string_t task = ns(ResponseFDRTaskFD_task_get(res));
     int outsize = flatbuffers_string_len(task);

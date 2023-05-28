@@ -13,5 +13,5 @@ enum Status : int32 {
 
 table Response {
     status:bughive.Status;
-    msg:string;
+    errmsg:string;
 }

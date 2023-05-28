@@ -14,10 +14,9 @@
 #include <nanomsg/nn.h>
 #include <nanomsg/reqrep.h>
 
-#undef ns
 #define ns(x) FLATBUFFERS_WRAP_NAMESPACE(bughive_policy, x)
+#define nsfdr(x) FLATBUFFERS_WRAP_NAMESPACE(bughive_fdr, x)
 #define reqtype(X) ns(RequestType_REQ_##X)
-
 
 static void *resFDRTaskFD(int sock,
                           flatcc_builder_t *builder,
@@ -32,6 +31,11 @@ static void *resFDRTaskFD(int sock,
 
     flatcc_builder_reset(builder);
     ns(ResponseFDRTaskFD_start_as_root(builder));
+
+    ns(ResponseFDRTaskFD_response_start(builder));
+    bughive_Response_status_add(builder, bughive_Status_OK);
+    ns(ResponseFDRTaskFD_response_end(builder));
+
     ns(ResponseFDRTaskFD_task_create(builder, task, size));
     ns(ResponseFDRTaskFD_end_as_root(builder));
 
@@ -46,19 +50,35 @@ static void *resFDROperator(int sock,
                             void *userdata,
                             size_t *bufsize)
 {
-    return NULL;
-    /*
-
-    size_t size;
-    char *task = req_fdr_fd(&size, userdata);
-    if (task == NULL)
+    if (!ns(Request_state_is_present(req))){
+        fprintf(stderr, "Error: Invalid request. Missing .state member.\n");
         return NULL;
+    }
 
+    nsfdr(State_table_t) _state = ns(Request_state_get(req));
+    flatbuffers_int32_vec_t state = nsfdr(State_val_get(_state));
+
+    int op_id = -1;
+    if (sizeof(int) == 4){
+    }else{
+        int size = flatbuffers_int32_vec_len(state);
+        int fdrstate[size];
+        for (int i = 0; i < size; ++i)
+            fdrstate[i] = flatbuffers_int32_vec_at(state, i);
+
+        op_id = req_fn(fdrstate, userdata);
+    }
+
+    flatcc_builder_reset(builder);
     ns(ResponseFDROperator_start_as_root(builder));
+
+    ns(ResponseFDROperator_response_start(builder));
+    bughive_Response_status_add(builder, bughive_Status_OK);
+    ns(ResponseFDROperator_response_end(builder));
+
     ns(ResponseFDROperator_operator_add(builder, op_id));
     ns(ResponseFDROperator_end_as_root(builder));
     return flatcc_builder_get_direct_buffer(builder, bufsize);
-    */
 }
 
 int bughivePolicyServer(const char *url,

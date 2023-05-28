@@ -20,6 +20,7 @@ table Request {
 }
 
 table ResponseFDRTaskFD {
+    response:bughive.Response (required);
     task:string (required);
 }
 
