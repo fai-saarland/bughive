@@ -1,12 +1,10 @@
 DEBUG ?= no
 WERROR ?= no
 
-
 AR ?= ar
 RANLIB ?= ranlib
 CC ?= gcc
-
-FLATC := third-party/flatbuffers/build/flatc
+CXX ?= g++
 
 CFLAGS :=
 CFLAGS += -Wall -pedantic
@@ -19,8 +17,39 @@ ifeq '$(WERROR)' 'yes'
   CFLAGS += -Werror
 endif
 CFLAGS += -I.
-CFLAGS += -Ithird-party/flatcc/include
-CFLAGS += -Ithird-party/nng/include/nng/compat
+CFLAGS += -Ipheromone/include
+
+# TODO
+DYNET_ROOT ?= /opt/dynet
+
+ASNETS_CFLAGS := $(CFLAGS)
+ASNETS_CFLAGS += -Iasnets-cpddl
+
+ASNETS_LDFLAGS += -Lasnets-cpddl -lpddl
+ASNETS_LDFLAGS += -Lpheromone -lpheromone
+ASNETS_LDFLAGS += $(shell pkg-config --libs grpc++ protobuf)
+# TODO
+ASNETS_LDFLAGS += -L$(DYNET_ROOT)/lib -Wl,-rpath=$(DYNET_ROOT)/lib -ldynet
+ASNETS_LDFLAGS += -lm -lstdc++
+
+TARGETS = asnets
+
+all:
+
+asnets: asnets.c pheromone asnets-cpddl
+	$(CC) $(ASNETS_CFLAGS) -o $@ $< $(ASNETS_LDFLAGS)
+
+pheromone: pheromone/libpheromone.a
+pheromone/libpheromone.a: pheromone/Makefile
+	cd pheromone && $(MAKE)
+pheromone/Makefile:
+	git submodule update --init -- pheromone
+
+asnets-cpddl: asnets-cpddl/libpddl.a
+asnets-cpddl/libpddl.a: asnets-cpddl/Makefile
+	cd asnets-cpddl && $(MAKE) DYNET_ROOT=$(DYNET_ROOT) # TODO
+asnets-cpddl/Makefile:
+	git submodule update --init -- asnets-cpddl
 
 #LDFLAGS += -L. -lbughive -pthread
 LDFLAGS += libbughive.a -pthread
@@ -37,8 +66,6 @@ OBJS := $(foreach obj,$(SRC),.objs/$(obj).o)
 TESTS  = policy_server
 TESTS += policy_cat_fdr_task_fd
 TESTS := $(foreach t,$(TESTS),test/test_$(t))
-
-all: libbughive.a test
 
 libbughive_standalone.a: $(OBJS) $(MAKE_FILES)
 	rm -f $@
@@ -136,4 +163,4 @@ help:
 	@echo "  CFLAGS  = $(CFLAGS)"
 	@echo "  LDFLAGS = $(LDFLAGS)"
 
-.PHONY: all python flatcc nanomsg flatbuffers
+.PHONY: all python pheromone asnets-cpddl
