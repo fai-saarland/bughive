@@ -9,14 +9,15 @@ const pddl_asnets_ground_task_t *task = NULL;
 static char *reqFDRTaskFD(size_t *size, void *data)
 {
     char *out = NULL;
-    size_t out_size = 0;
-    FILE *fout = pddl_strstream(&out, &out_size);
+    FILE *fout = pddl_strstream(&out, size);
 
     pddl_fdr_write_config_t write_cfg = PDDL_FDR_WRITE_CONFIG_INIT;
     write_cfg.fout = fout;
     write_cfg.use_fd_fact_names = 1;
     //write_cfg.use_osp_params = 1;
     pddlFDRWrite(&task->fdr, &write_cfg);
+    fflush(fout);
+    fclose(fout);
     return out;
 }
 

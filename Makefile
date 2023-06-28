@@ -52,8 +52,6 @@ asnets-cpddl/Makefile:
 	git submodule update --init -- asnets-cpddl
 
 
-
-
 help:
 	@echo "Variables:"
 	@echo "  CC      = $(CC)"
