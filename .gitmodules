@@ -7,3 +7,7 @@
 [submodule "pheromone"]
 	path = pheromone
 	url = ../pheromone
+[submodule "asnets-cpddl"]
+	path = asnets-cpddl
+	url = https://gitlab.com/danfis/cpddl
+	branch = 75-asnets
