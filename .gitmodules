@@ -7,6 +7,3 @@
 [submodule "pheromone"]
 	path = pheromone
 	url = ../pheromone
-[submodule "cpddl"]
-	path = cpddl
-	url = https://gitlab.com/danfis/cpddl
