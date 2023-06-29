@@ -28,7 +28,10 @@ static int reqFDROperator(const int *state, void *data)
 int main(int argc, char *argv[])
 {
     if (argc != 5){
-        fprintf(stderr, "Usage: %s url model.policy domain.pddl problem.pddl\n", argv[0]);
+        fprintf(stderr, "Usage: %s URL model.policy domain.pddl problem.pddl\n", argv[0]);
+        fprintf(stderr, "\n");
+        fprintf(stderr, "See https://grpc.github.io/grpc/cpp/md_doc_naming.html"
+                        " for how to specify URL.\n");
         exit(-1);
     }
 
@@ -57,6 +60,5 @@ int main(int argc, char *argv[])
     }
     task = pddlASNetsGetGroundTask(asnets, 0);
 
-    int ret = phrmPolicyServer(url, reqFDRTaskFD, reqFDROperator, NULL);
-    return ret;
+    return phrmPolicyServer(url, reqFDRTaskFD, reqFDROperator, NULL);
 }

@@ -48,9 +48,17 @@ pheromone/Makefile:
 
 asnets-cpddl: asnets-cpddl/libpddl.a
 asnets-cpddl/libpddl.a: asnets-cpddl/Makefile
-	cd asnets-cpddl && $(MAKE) DYNET_ROOT=$(DYNET_ROOT) # TODO
+	cd asnets-cpddl && $(MAKE) DYNET_ROOT=$(DYNET_ROOT)
 asnets-cpddl/Makefile:
 	git submodule update --init -- asnets-cpddl
+
+
+clean:
+	rm -f $(TARGETS)
+
+mrproper: clean
+	if [ -f pheromone/Makefile ]; then $(MAKE) -C pheromone clean; fi;
+	if [ -f asnets-cpddl/Makefile ]; then $(MAKE) -C asnets-cpddl mrproper; fi
 
 
 help:
@@ -66,4 +74,4 @@ help:
 	@echo "  ASNETS_CFLAGS = $(ASNETS_CFLAGS)"
 	@echo "  ASNETS_LDFLAGS = $(ASNETS_LDFLAGS)"
 
-.PHONY: all python pheromone asnets-cpddl
+.PHONY: all clean mrproper pheromone asnets-cpddl
