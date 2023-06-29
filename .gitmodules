@@ -5,6 +5,3 @@
 	path = asnets-cpddl
 	url = https://gitlab.com/danfis/cpddl
 	branch = 75-asnets
-[submodule "dynet"]
-	path = dynet
-	url = https://github.com/clab/dynet.git
