@@ -1,8 +1,8 @@
+-include Makefile.config
+
 DEBUG ?= no
 WERROR ?= no
 
-AR ?= ar
-RANLIB ?= ranlib
 CC ?= gcc
 CXX ?= g++
 
@@ -19,17 +19,18 @@ endif
 CFLAGS += -I.
 CFLAGS += -Ipheromone/include
 
-# TODO
+PHEROMONE_LDFLAGS ?= -Lpheromone -lpheromone $(shell pkg-config --libs grpc++ protobuf)
+
 DYNET_ROOT ?= /opt/dynet
+DYNET_LDFLAGS ?= -L$(DYNET_ROOT)/lib -Wl,-rpath=$(DYNET_ROOT)/lib -ldynet
 
 ASNETS_CFLAGS := $(CFLAGS)
 ASNETS_CFLAGS += -Iasnets-cpddl
 
 ASNETS_LDFLAGS += -Lasnets-cpddl -lpddl
 ASNETS_LDFLAGS += -Lpheromone -lpheromone
-ASNETS_LDFLAGS += $(shell pkg-config --libs grpc++ protobuf)
-# TODO
-ASNETS_LDFLAGS += -L$(DYNET_ROOT)/lib -Wl,-rpath=$(DYNET_ROOT)/lib -ldynet
+ASNETS_LDFLAGS += $(PHEROMONE_LDFLAGS)
+ASNETS_LDFLAGS += $(DYNET_LDFLAGS)
 ASNETS_LDFLAGS += -lm -lstdc++
 
 TARGETS = asnets
@@ -56,11 +57,13 @@ help:
 	@echo "Variables:"
 	@echo "  CC      = $(CC)"
 	@echo "  CXX     = $(CXX)"
-	@echo "  AR      = $(AR)"
-	@echo "  RANLIB  = $(RANLIB)"
 	@echo "  DEBUG   = $(DEBUG)"
 	@echo "  WERROR  = $(WERROR)"
 	@echo "  CFLAGS  = $(CFLAGS)"
-	@echo "  LDFLAGS = $(LDFLAGS)"
+	@echo "  PHEROMONE_LDFLAGS = $(PHEROMONE_LDFLAGS)"
+	@echo "  DYNET_ROOT = $(DYNET_ROOT)"
+	@echo "  DYNET_LDFLAGS = $(DYNET_LDFLAGS)"
+	@echo "  ASNETS_CFLAGS = $(ASNETS_CFLAGS)"
+	@echo "  ASNETS_LDFLAGS = $(ASNETS_LDFLAGS)"
 
 .PHONY: all python pheromone asnets-cpddl

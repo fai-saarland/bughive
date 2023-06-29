@@ -14,7 +14,6 @@ static char *reqFDRTaskFD(size_t *size, void *data)
     pddl_fdr_write_config_t write_cfg = PDDL_FDR_WRITE_CONFIG_INIT;
     write_cfg.fout = fout;
     write_cfg.use_fd_fact_names = 1;
-    //write_cfg.use_osp_params = 1;
     pddlFDRWrite(&task->fdr, &write_cfg);
     fflush(fout);
     fclose(fout);
