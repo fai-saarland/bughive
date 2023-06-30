@@ -5,3 +5,6 @@
 	path = asnets-cpddl
 	url = https://gitlab.com/danfis/cpddl
 	branch = 75-asnets
+[submodule "fd-action-policy-testing"]
+	path = fd-action-policy-testing
+	url = git@github.com:fai-saarland/fd-action-policy-testing.git

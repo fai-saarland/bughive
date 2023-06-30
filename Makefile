@@ -1,5 +1,7 @@
 -include Makefile.config
 
+ROOTDIR := $(dir $(realpath $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))))
+
 DEBUG ?= no
 WERROR ?= no
 
@@ -52,6 +54,9 @@ asnets-cpddl/libpddl.a: asnets-cpddl/Makefile
 asnets-cpddl/Makefile:
 	git submodule update --init -- asnets-cpddl
 
+fd-action-policy-testing: pheromone
+	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py testing
+
 
 clean:
 	rm -f $(TARGETS)
@@ -74,4 +79,5 @@ help:
 	@echo "  ASNETS_CFLAGS = $(ASNETS_CFLAGS)"
 	@echo "  ASNETS_LDFLAGS = $(ASNETS_LDFLAGS)"
 
-.PHONY: all clean mrproper pheromone asnets-cpddl
+.PHONY: all clean mrproper pheromone asnets-cpddl \
+        fd-policy-testing
