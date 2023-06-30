@@ -6,7 +6,10 @@ The purpose of this project is to put together all different tools and projects
 used in Action Policy Testing, plus some glue code to make them run together.
 
 ## cpddl ASNets
-ASNets policy server based on the cpddl implementation can be compiled by
+ASNets policy server based on the cpddl implementation requires
+[DyNet](https://github.com/clab/dynet) library. Once it is installed, set the
+variable ``DYNET_ROOT`` to the root directory of the DyNet installation (e.g.,
+by creating a file ``Makefile.config``) and compile the policy server with:
 ```sh
   $ make asnets
 ```
