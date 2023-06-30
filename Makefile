@@ -54,8 +54,10 @@ asnets-cpddl/libpddl.a: asnets-cpddl/Makefile
 asnets-cpddl/Makefile:
 	git submodule update --init -- asnets-cpddl
 
-fd-action-policy-testing: pheromone
+fd-action-policy-testing: fd-action-policy-testing/build.py pheromone
 	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py testing
+fd-action-policy-testing/build.py:
+	git submodule update --init -- fd-action-policy-testing
 
 
 clean:
