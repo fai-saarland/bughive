@@ -37,10 +37,10 @@ ASNETS_LDFLAGS += -lm -lstdc++
 
 TARGETS = asnets
 
-all:
+all: asnets pheromone fd-action-policy-testing
 
-asnets: asnets.c pheromone asnets-cpddl
-	$(CC) $(ASNETS_CFLAGS) -o $@ $< $(ASNETS_LDFLAGS)
+asnets: remote_policies/asnets.c pheromone asnets-cpddl
+	$(CC) $(ASNETS_CFLAGS) -o remote_policies/$@ $< $(ASNETS_LDFLAGS)
 
 pheromone: pheromone/libpheromone.a
 pheromone/libpheromone.a: pheromone/Makefile
@@ -55,7 +55,9 @@ asnets-cpddl/Makefile:
 	git submodule update --init -- asnets-cpddl
 
 fd-action-policy-testing: fd-action-policy-testing/build.py pheromone
-	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py testing
+	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py release
+server-policy-testing: fd-action-policy-testing/build.py pheromone
+	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py release_custom_boost
 fd-action-policy-testing/build.py:
 	git submodule update --init -- fd-action-policy-testing
 
@@ -82,4 +84,4 @@ help:
 	@echo "  ASNETS_LDFLAGS = $(ASNETS_LDFLAGS)"
 
 .PHONY: all clean mrproper pheromone asnets-cpddl \
-        fd-policy-testing
+        fd-action-policy-testing server-policy-testing
