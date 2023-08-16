@@ -1,6 +1,7 @@
 [submodule "pheromone"]
 	path = pheromone
-	url = ../pheromone
+	url = git@github.com:fai-saarland/pheromone.git
+	branch = feature
 [submodule "asnets-cpddl"]
 	path = asnets-cpddl
 	url = https://gitlab.com/danfis/cpddl
