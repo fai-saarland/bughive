@@ -15,4 +15,4 @@ test/test_*
 python/msg/
 env/
 asnets
-*/.idea
+.idea
