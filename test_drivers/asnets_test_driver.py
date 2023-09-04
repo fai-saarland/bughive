@@ -1,27 +1,45 @@
 #!/usr/bin/env python3
-
+import os
 import subprocess
 import argparse
 import re
 import sys
 import time
+import resource
 
-# example call formatter_class=argparse.ArgumentDefaultsHelpFormatter
 
 script_start = time.time()
 parser = argparse.ArgumentParser(description="Driver for debugging remote ASNet policies",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("asnet", help="Path to the script starting the ASNet server")
+parser.add_argument("asnet", help="Path to the executable starting the ASNet server")
 parser.add_argument("model", help="Path to the ASNet policy file")
 parser.add_argument("domain", help="Path to the PDDL domain file")
 parser.add_argument("problem", help="Path to the PDDL problem file")
 parser.add_argument("fd", help="Path to the FD executable (not the driver script)")
 parser.add_argument("search", help="Search configuration of FD")
 parser.add_argument("-t", "--timeout", type=int, help="Time limit for the driver in seconds")
+parser.add_argument("-m", "--mem", type=int, help="Memory limit for the driver in MiB")
 args = parser.parse_args()
 
 command = [args.asnet, "localhost:0", args.model, args.domain, args.problem]
 return_code = 3
+
+# get the available memory and leave margin for driver itself
+set_mem_limit = False
+if args.mem is not None:
+    available_mem = args.mem * 1024 * 1024 - 10
+    set_mem_limit = True
+else:
+    current_rlimit = resource.getrlimit(resource.RLIMIT_AS)[0]
+    if current_rlimit >= 0:
+        available_mem = current_rlimit - 10
+        set_mem_limit = True
+if set_mem_limit:
+    if available_mem <= 2:
+        print("Not enough memory provided. Server and FD not started.")
+        sys.exit(5)
+    internal_mem_limit = (available_mem // 2)  # memory limit for server and client each
+    resource.setrlimit(resource.RLIMIT_AS, (internal_mem_limit, internal_mem_limit))
 
 with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as server_process:
     port = 0
