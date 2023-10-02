@@ -42,9 +42,12 @@ all: asnets pheromone fd-action-policy-testing
 asnets: remote_policies/asnets.c pheromone asnets-cpddl
 	$(CC) $(ASNETS_CFLAGS) -o remote_policies/$@ $< $(ASNETS_LDFLAGS)
 
-pheromone: pheromone/libpheromone.a
+pheromone: pheromone/libpheromone.a pheromone/libpheromone.so
 pheromone/libpheromone.a: pheromone/Makefile
 	cd pheromone && $(MAKE)
+pheromone/libpheromone.so: pheromone/Makefile
+	cd pheromone && $(MAKE) libpheromone.so
+
 pheromone/Makefile:
 	git submodule update --init -- pheromone
 
