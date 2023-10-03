@@ -36,15 +36,16 @@ def run_driver(server_command, args):
         internal_mem_limit = (available_mem // 2)  # memory limit for server and client each
         resource.setrlimit(resource.RLIMIT_AS, (internal_mem_limit, internal_mem_limit))
 
-    with subprocess.Popen(server_command, stdout=subprocess.PIPE) as server_process:
+    with subprocess.Popen(server_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as server_process:
         port = 0
         for line in server_process.stdout:
-            if "Server listening on port " in line.decode():
-                port = int(re.search(r'\d+', line.decode()).group())
+            decoded_line = line.decode()
+            print(decoded_line, end="")
+            if "Server listening on port " in decoded_line:
+                port = int(re.search(r'\d+', decoded_line).group())
                 break
         connecting_end = time.time()
         if port == 0:
-            print(server_process.stdout)
             print("Cannot setup policy server", flush=True)
             return_code = 2
         else:
@@ -66,6 +67,8 @@ def run_driver(server_command, args):
                 return_code = 4
             server_process.terminate()
             if return_code == 35:
-                print("\nProblem with remote policy detected, printing policy server log", flush=True)
-                print(server_process.stdout, flush=True)
+                print("\nProblem with remote policy detected, return code 35", flush=True)
+            server_log = server_process.stdout.read().decode()
+            if server_log:
+                print(f"Policy server log:\n{server_log}", flush=True)
     sys.exit(return_code)
