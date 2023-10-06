@@ -17,11 +17,11 @@ class BugInfo:
         """state as list of integers (values of FDR variables)"""
         self.bug_value = bug_value
         """
-        lower bound for how buggy a state is as an integer (bug_value == 1 or bug_value > 0)
+        lower bound for how buggy a state is as an integer (bug_value == -1 or bug_value > 0)
         * special value -1 means +infinity, i.e., policy fails to solve solvable state
         * otherwise the policy solved the state, but there is another plan with at least bug_value less cost
         """
-        assert bug_value == 1 or bug_value > 0
+        assert bug_value == -1 or bug_value > 0
         self.cost_bound = cost_bound
         """finite integer upper bound for h*(state)"""
         assert 0 <= cost_bound
