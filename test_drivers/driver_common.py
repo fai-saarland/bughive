@@ -6,11 +6,11 @@ import resource
 
 
 def add_common_args(parser):
-    parser.add_argument("model", help="Path to the policy model file")
-    parser.add_argument("domain", help="Path to the PDDL domain file")
-    parser.add_argument("problem", help="Path to the PDDL problem file")
-    parser.add_argument("downward", help="Path to the downward executable (not the FD driver script)")
-    parser.add_argument("search", help="Search configuration of FD")
+    parser.add_argument("--model", required=True, help="Path to the policy model file")
+    parser.add_argument("--domain", required=True, help="Path to the PDDL domain file, required if no sas file is provided")
+    parser.add_argument("--problem", required=True, help="Path to the PDDL problem file, required if no sas file is provided")
+    parser.add_argument("--downward", required=True, help="Path to the downward executable (not the FD driver script)")
+    parser.add_argument("--search", required=True, help="Search configuration of FD")
     parser.add_argument("-t", "--timeout", type=int, help="Time limit for the driver in seconds")
     parser.add_argument("-m", "--mem", type=int, help="Memory limit for the driver in MiB")
 
