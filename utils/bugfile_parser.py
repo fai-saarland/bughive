@@ -31,21 +31,30 @@ class BugInfo:
     def __iter__(self):
         return iter((self.state_vals, self.bug_value, self.cost_bound, self.in_pool))
 
+    def __repr__(self):
+        return (f'<BugInfo state_vals:{self.state_vals} bug_value:{self.bug_value} '
+                f'cost_bound:{self.cost_bound} in_pool:{self.in_pool}>')
+
     def get_policy_cost(self):
         """get the cost of the plan the policy found or -1 if no plan was found"""
         return -1 if self.bug_value == -1 else self.cost_bound + self.bug_value
 
 
 def parse_bug_file(path):
-    """parses the provided bugfile and returns a list of BugInfos"""
+    """parses the provided bugfile and returns a list of BugInfos and (if included in bugfile) the task in sas format"""
     state_map = dict()
     result_map = dict()
     pool = set()
     bugs = []
+    sas = ""
     with open(path, 'r') as f:
         def next_line():
             return f.readline().rstrip()
         while line := next_line():
+            if line == "begin_sas":
+                while (line := f.readline()) != "end_sas\n":
+                    sas += line
+                continue
             state_id = int(line)
             case = next_line()
             if case == 'state':
@@ -78,11 +87,13 @@ def parse_bug_file(path):
             if cost_bound == -1:
                 continue
             bugs.append(BugInfo(state_vals, bug_value, cost_bound, state_id in pool))
-        return bugs
+        return bugs, sas
 
 
-def dump(outfile, bugs):
+def dump(outfile, bugs, sas):
     with open(outfile, 'w') as f:
+        if sas:
+            f.write(f"begin_sas\n{sas}end_sas\n")
         for i, (vals, bug_value, cost_bound, in_pool) in enumerate(bugs):
             f.write(f'{i}\nstate\n{" ".join([str(x) for x in vals])}\n{i}\nresult\n{bug_value}\n{cost_bound}\n')
             if in_pool:
@@ -92,4 +103,5 @@ def dump(outfile, bugs):
 if __name__ == "__main__":
     args = parse_arguments()
     if args.clean:
-        dump(args.bugfile, parse_bug_file(args.bugfile))
+        bugs, sas = parse_bug_file(args.bugfile)
+        dump(args.bugfile, bugs, sas)
