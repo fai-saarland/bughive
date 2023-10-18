@@ -21,7 +21,7 @@ endif
 CFLAGS += -I.
 CFLAGS += -Ipheromone/include
 
-PHEROMONE_LDFLAGS ?= -Lpheromone -lpheromone $(shell pkg-config --libs grpc++ protobuf)
+PHEROMONE_LDFLAGS ?= $(ROOTDIR)/pheromone/libpheromone.a $(shell pkg-config --libs grpc++ protobuf)
 
 DYNET_ROOT ?= /opt/dynet
 DYNET_LDFLAGS ?= -L$(DYNET_ROOT)/lib -Wl,-rpath=$(DYNET_ROOT)/lib -ldynet
@@ -30,7 +30,6 @@ ASNETS_CFLAGS := $(CFLAGS)
 ASNETS_CFLAGS += -Iasnets-cpddl
 
 ASNETS_LDFLAGS += -Lasnets-cpddl -lpddl
-ASNETS_LDFLAGS += -Lpheromone -lpheromone
 ASNETS_LDFLAGS += $(PHEROMONE_LDFLAGS)
 ASNETS_LDFLAGS += $(DYNET_LDFLAGS)
 ASNETS_LDFLAGS += -lm -lstdc++
