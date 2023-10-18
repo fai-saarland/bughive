@@ -1,0 +1,45 @@
+Bootstrap: docker
+From: ubuntu:20.04
+Stage: build
+
+%setup
+    git clone -b 2.1.2 --depth 1 https://github.com/clab/dynet.git $APPTAINER_ROOTFS/dynet-src
+    cp -r ./ $APPTAINER_ROOTFS/bughive
+
+
+%post
+    apt -y update
+    apt -y upgrade
+    apt -y install g++ make cmake
+    apt -y install libeigen3-dev
+    apt -y install pkgconf libgrpc++-dev libprotobuf-dev protobuf-compiler protobuf-compiler-grpc
+
+    cd /dynet-src
+    mkdir build
+    cd build
+    cmake .. -DEIGEN3_INCLUDE_DIR=/usr/include/eigen3 -DCMAKE_INSTALL_PREFIX=/dynet
+    make
+    make install
+
+    cd /bughive
+    echo "DYNET_ROOT = /dynet" >Makefile.config
+    make asnets
+    cp /bughive/remote_policies/asnets /asnets
+
+
+Bootstrap: docker
+From: ubuntu:20.04
+Stage: run
+
+%files from build
+    /asnets
+    /dynet/lib/libdynet.so
+
+%post
+    apt -y update
+    apt -y upgrade
+    apt -y install libgrpc++1 libprotobuf17
+    rm -rf /etc/apt
+
+%runscript
+    /asnets $@
