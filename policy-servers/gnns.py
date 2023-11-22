@@ -38,6 +38,9 @@ def apply_policy(state):
     return policy.apply_policy_to_state(state)
 
 
+def fdr_state_operators_prob(state):
+    return policy.apply_policy_to_state_prob_dist(state)
+
 if __name__ == "__main__":
     args = parse_arguments()
     assert args.fd or args.sas
@@ -50,5 +53,5 @@ if __name__ == "__main__":
     if args.cpu:
         setup_args += " --cpu"
     policy.setup(setup_args)
-    policyServer(args.url, get_task, apply_policy)
+    policyServer(args.url, get_task, apply_policy, fdr_state_operators_prob)
 
