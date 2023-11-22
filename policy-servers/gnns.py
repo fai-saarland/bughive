@@ -6,6 +6,16 @@ import subprocess
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+scriptdir = os.path.dirname(os.path.abspath(__file__))
+phrm_dirs = [os.path.abspath('.'),
+             os.path.abspath(os.path.join(scriptdir, '..', 'pheromone'))]
+for phrm_dir in phrm_dirs:
+    if os.path.isdir(os.path.join(phrm_dir, 'pyphrm')) \
+       and os.path.isfile(os.path.join(phrm_dir, 'pyphrm', 'policy_pb2_grpc.py')):
+        sys.path.append(phrm_dir)
+        print(f'Found pyphrm library in {phrm_dir}')
+
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -28,11 +38,14 @@ def apply_policy(state):
     return policy.apply_policy_to_state(state)
 
 
+def fdr_state_operators_prob(state):
+    return policy.apply_policy_to_state_prob_dist(state)
+
 if __name__ == "__main__":
     args = parse_arguments()
     assert args.fd or args.sas
     from gnn.network import plan as policy
-    from pheromone import pheromone
+    from pyphrm import policyServer
     if not args.sas:
         subprocess.call(f"python3 {args.fd} --translate {args.domain} {args.problem}", shell=True, stdout=subprocess.DEVNULL)
     sas_file = args.sas if args.sas else "output.sas"
@@ -40,5 +53,5 @@ if __name__ == "__main__":
     if args.cpu:
         setup_args += " --cpu"
     policy.setup(setup_args)
-    pheromone.start_server(args.url, get_task, apply_policy)
+    policyServer(args.url, get_task, apply_policy, fdr_state_operators_prob)
 

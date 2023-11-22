@@ -25,6 +25,26 @@ static int reqFDROperator(const int *state, void *data)
     return pddlASNetsRunPolicy(asnets, task, state, NULL);
 }
 
+static int reqFDROperatorsProb(const int *state,
+                               int *op_size,
+                               int **op_ids,
+                               float **op_probs,
+                               void *userdata)
+{
+    pddl_asnets_policy_distribution_t op_dist;
+    pddlASNetsPolicyDistributionInit(&op_dist);
+    int st = pddlASNetsPolicyDistribution(asnets, task, state, &op_dist);
+    if (st == 0){
+        *op_size = op_dist.op_size;
+        *op_ids = (int *)malloc(sizeof(int) * *op_size);
+        *op_probs = (float *)malloc(sizeof(float) * *op_size);
+        memcpy(*op_ids, op_dist.op_id, sizeof(int) * *op_size);
+        memcpy(*op_probs, op_dist.prob, sizeof(float) * *op_size);
+    }
+    pddlASNetsPolicyDistributionFree(&op_dist);
+    return st;
+}
+
 int main(int argc, char *argv[])
 {
     if (argc != 5){
@@ -60,5 +80,6 @@ int main(int argc, char *argv[])
     }
     task = pddlASNetsGetGroundTask(asnets, 0);
 
-    return phrmPolicyServer(url, reqFDRTaskFD, reqFDROperator, NULL);
+    return phrmPolicyServer(url, reqFDRTaskFD, reqFDROperator,
+                            reqFDROperatorsProb, NULL);
 }
