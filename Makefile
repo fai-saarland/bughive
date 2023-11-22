@@ -38,10 +38,10 @@ TARGETS = asnets
 
 all: asnets pheromone fd-action-policy-testing
 
-asnets: remote_policies/asnets.c pheromone asnets-cpddl
-	$(CC) $(ASNETS_CFLAGS) -o remote_policies/$@ $< $(ASNETS_LDFLAGS)
+asnets: policy-servers/asnets.c pheromone/libpheromone.a asnets-cpddl/libpddl.a
+	$(CC) $(ASNETS_CFLAGS) -o policy-servers/$@ $< $(ASNETS_LDFLAGS)
 
-pheromone: pheromone/libpheromone.a pheromone/libpheromone.so
+pheromone: pheromone/libpheromone.a
 pheromone/libpheromone.a: pheromone/Makefile
 	cd pheromone && $(MAKE)
 pheromone/libpheromone.so: pheromone/Makefile
@@ -56,9 +56,9 @@ asnets-cpddl/libpddl.a: asnets-cpddl/Makefile
 asnets-cpddl/Makefile:
 	git submodule update --init -- asnets-cpddl
 
-fd-action-policy-testing: fd-action-policy-testing/build.py pheromone
+fd-action-policy-testing: fd-action-policy-testing/build.py pheromone/libpheromone.a
 	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py release
-server-policy-testing: fd-action-policy-testing/build.py pheromone
+server-policy-testing: fd-action-policy-testing/build.py pheromone/libpheromone.a
 	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py release_custom_boost
 fd-action-policy-testing/build.py:
 	git submodule update --init -- fd-action-policy-testing
@@ -70,6 +70,7 @@ clean:
 mrproper: clean
 	if [ -f pheromone/Makefile ]; then $(MAKE) -C pheromone clean; fi;
 	if [ -f asnets-cpddl/Makefile ]; then $(MAKE) -C asnets-cpddl mrproper; fi
+	if [ -d fd-action-policy-testing/builds ]; then rm -rf fd-action-policy-testing/builds; fi
 
 
 help:
