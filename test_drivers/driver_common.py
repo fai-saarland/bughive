@@ -58,9 +58,11 @@ def run_driver(server_command, args):
                     server_process.terminate()
                     sys.exit(4)
                 print("Starting FD process", flush=True)
+                process_start_time = time.time()
                 fd_process = subprocess.run([args.downward, "--remote-policy", f"localhost:{port}", "--search", args.search],
                                             timeout=args.timeout)
                 return_code = fd_process.returncode
+                print(f"Full run time: {time.time() - process_start_time}", flush=True)
                 print(f"FD process terminated with return code {return_code}", flush=True)
             except subprocess.TimeoutExpired:
                 print("FD process timed out", flush=True)
