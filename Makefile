@@ -4,6 +4,7 @@ ROOTDIR := $(dir $(realpath $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))))
 
 DEBUG ?= no
 WERROR ?= no
+TEST_LAB_ENV ?= no
 
 CC ?= gcc
 CXX ?= g++
@@ -48,21 +49,18 @@ pheromone/libpheromone.so: pheromone/Makefile
 	cd pheromone && $(MAKE) libpheromone.so
 
 pheromone/Makefile:
-	git submodule update --init -- pheromone
+	if [ $(TEST_LAB_ENV) = no ]; then git submodule update --init -- pheromone; fi
 
 asnets-cpddl: asnets-cpddl/libpddl.a
 asnets-cpddl/libpddl.a: asnets-cpddl/Makefile
 	cd asnets-cpddl && $(MAKE) DYNET_ROOT=$(DYNET_ROOT)
 asnets-cpddl/Makefile:
-	git submodule update --init -- asnets-cpddl
+	if [ $(TEST_LAB_ENV) = no ]; then git submodule update --init -- asnets-cpddl; fi
 
 fd-action-policy-testing: fd-action-policy-testing/build.py pheromone/libpheromone.a
 	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py release
-server-policy-testing: fd-action-policy-testing/build.py pheromone/libpheromone.a
-	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py release_custom_boost
 fd-action-policy-testing/build.py:
-	git submodule update --init -- fd-action-policy-testing
-
+	if [ $(TEST_LAB_ENV) = no ]; then git submodule update --init -- fd-action-policy-testing; fi
 
 clean:
 	rm -f $(TARGETS)
@@ -85,6 +83,10 @@ help:
 	@echo "  DYNET_LDFLAGS = $(DYNET_LDFLAGS)"
 	@echo "  ASNETS_CFLAGS = $(ASNETS_CFLAGS)"
 	@echo "  ASNETS_LDFLAGS = $(ASNETS_LDFLAGS)"
+	@echo "  MAKEFLAGS = $(MAKEFLAGS)"
+	@echo "  BUGHIVE_UPDATE_SUBMODULES = $(BUGHIVE_UPDATE_SUBMODULES)"
 
 .PHONY: all clean mrproper pheromone asnets-cpddl \
         fd-action-policy-testing server-policy-testing
+
+
