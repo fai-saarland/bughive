@@ -87,6 +87,6 @@ help:
 	@echo "  BUGHIVE_UPDATE_SUBMODULES = $(BUGHIVE_UPDATE_SUBMODULES)"
 
 .PHONY: all clean mrproper pheromone asnets-cpddl \
-        fd-action-policy-testing server-policy-testing
+        fd-action-policy-testing
 
 
