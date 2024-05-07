@@ -59,6 +59,8 @@ asnets-cpddl/Makefile:
 
 fd-action-policy-testing: fd-action-policy-testing/build.py pheromone/libpheromone.a
 	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py release
+fd-action-policy-testing-debug: fd-action-policy-testing/build.py pheromone/libpheromone.a
+	cd fd-action-policy-testing && PHRM_ROOT=$(ROOTDIR)/pheromone python3 build.py debug
 fd-action-policy-testing/build.py:
 	if [ $(TEST_LAB_ENV) = no ]; then git submodule update --init -- fd-action-policy-testing; fi
 
