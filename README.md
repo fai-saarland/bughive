@@ -5,10 +5,18 @@ A collection of tools for Action Policy Testing.
 The purpose of this project is to put together all different tools and projects
 used in Action Policy Testing, plus some glue code to make them run together.
 
+The project is still active.
+Please check our [GitHub repository](https://github.com/fai-saarland/bughive) for newer versions.
+
+## Building the Project
+
+How the different components can be built is described in the following sections.
+We only support Linux.
+
 ## cpddl ASNets
 
 ASNets policy server based on the cpddl implementation requires
-[DyNet](https://github.com/clab/dynet) library. Once it is installed, set the
+[DyNet](https://github.com/clab/dynet). Once it is installed, set the
 variable ``DYNET_ROOT`` to the root directory of the DyNet installation (e.g.,
 by creating a file ``Makefile.config``) and compile the policy server with:
 
@@ -59,14 +67,15 @@ to obtain the task in FDR representation).
 
 ## Fast Downward Action Policy Testing
 
-``fd-action-policy-testing`` includes an example how to implement client
-connecting to policy servers. Compile it with
+The [Fast Downward Action Policy Testing](https://github.com/fai-saarland/fd-action-policy-testing) repository contains the source code for the actual testing tool (added as a git submodule here).
+
+You can compile the testing engine with
 
 ```sh
   $ make fd-action-policy-testing
 ```
 
-Now, you can use for an execution of the policy by
+Now, you can use the tool e.g., for an execution of the policy as follows:
 
 ```sh
   # First start asnets policy server
@@ -75,4 +84,73 @@ Now, you can use for an execution of the policy by
   $ ./fd-action-policy-testing/builds/release/bin/downward \
             --remote-policy localhost:12345 \
             --search 'astar(blind(), pruning=remote_policy_pruning())'
+```
+
+Check out the test drivers sections for a more convenient way for invoking the testing tool.
+These will start the respective policy servers automatically (choosing a free port) and then invoke the testing tool setting the `--remote-policy` flag accordingly.
+
+The [README](fd-action-policy-testing/README.md) of the `fd-action-policy-testing` sub-module describes how to configure the testing engine, i.e., how to set the `--search` flag.
+
+## Test Drivers
+
+Instead of starting policy servers and connecting clients to it yourself, you can use the provided test driver scripts.
+The ``test_drivers`` directory contains driver scripts for testing both ASNets and GNN based policies.
+The scripts first start a policy server using a free port.
+After that, they invoke the FD action policy testing tool, connecting it to the policy server.
+
+### ASNet Policy Test Driver
+
+The ASNet policy test driver script is `test_drivers/asnets_test_driver.py`. 
+The ASNet policy server is in `./policy-servers/asnets`.
+The usage is as follows:
+
+```
+usage: asnets_test_driver.py [-h] --model MODEL --domain DOMAIN --problem PROBLEM --downward DOWNWARD --search SEARCH [-t TIMEOUT] [-m MEM] [--fdmem FDMEM] asnet
+
+Driver for debugging remote ASNet policies
+
+positional arguments:
+  asnet                 Path to the executable starting the ASNet server
+
+options:
+  -h, --help            show this help message and exit
+  --model MODEL         Path to the policy model file (default: None)
+  --domain DOMAIN       Path to the PDDL domain file, required if no sas file is provided (default: None)
+  --problem PROBLEM     Path to the PDDL problem file, required if no sas file is provided (default: None)
+  --downward DOWNWARD   Path to the downward executable (not the FD driver script) (default: None)
+  --search SEARCH       Search configuration of FD (default: None)
+  -t TIMEOUT, --timeout TIMEOUT
+                        Time limit for the driver in seconds (default: None)
+  -m MEM, --mem MEM     Memory limit for the driver in MiB (default: None)
+  --fdmem FDMEM         Set maximal memory limit for FD process in MiB (default: None)
+```
+
+### GNN Policy Test Driver
+
+The GNN policy test driver script is `test_drivers/gnns_test_driver.py`. 
+The respective policy server is in `./policy-servers/gnns.py`.
+The usage is as follows:
+
+```
+#usage: gnns_test_driver.py [-h] --gnn GNN [--fd FD] [--sas SAS] [--cpu] --model MODEL --domain DOMAIN --problem PROBLEM --downward DOWNWARD --search SEARCH [-t TIMEOUT] [-m MEM]
+                           [--fdmem FDMEM]
+
+Driver for debugging remote GNN policies
+
+options:
+  -h, --help            show this help message and exit
+  --gnn GNN             Path to the executable starting the GNN server (default: None)
+  --fd FD               Path to the FD driver script (for invoking the translator) (default: None)
+  --sas SAS             Path to the task sas file (default: None)
+  --cpu                 use CPU only in GNN server (default: False)
+  --model MODEL         Path to the policy model file (default: None)
+  --domain DOMAIN       Path to the PDDL domain file, required if no sas file is provided (default: None)
+  --problem PROBLEM     Path to the PDDL problem file, required if no sas file is provided (default: None)
+  --downward DOWNWARD   Path to the downward executable (not the FD driver script) (default: None)
+  --search SEARCH       Search configuration of FD (default: None)
+  -t TIMEOUT, --timeout TIMEOUT
+                        Time limit for the driver in seconds (default: None)
+  -m MEM, --mem MEM     Memory limit for the driver in MiB (default: None)
+  --fdmem FDMEM         Set maximal memory limit for FD process in MiB (default: None)
+
 ```
