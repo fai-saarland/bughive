@@ -1,6 +1,6 @@
 [submodule "pheromone"]
 	path = pheromone
-	url = git@github.com:fai-saarland/pheromone.git
+	url = ../pheromone.git
 	branch = master
 [submodule "asnets-cpddl"]
 	path = asnets-cpddl
@@ -8,9 +8,9 @@
 	branch = master
 [submodule "fd-action-policy-testing"]
 	path = fd-action-policy-testing
-	url = git@github.com:fai-saarland/fd-action-policy-testing.git
+	url = ../fd-action-policy-testing.git
 	branch = policy-testing-main
 [submodule "gnn"]
 	path = gnn
-	url = git@github.com:fai-saarland/gnn-policy-kr22.git
+	url = ../gnn-policy-kr22.git
 	branch = master
