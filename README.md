@@ -89,7 +89,7 @@ Now, you can use the tool e.g., for an execution of the policy as follows:
 Check out the test drivers sections for a more convenient way for invoking the testing tool.
 These will start the respective policy servers automatically (choosing a free port) and then invoke the testing tool setting the `--remote-policy` flag accordingly.
 
-The [README](fd-action-policy-testing/README.md) of the `fd-action-policy-testing` sub-module describes how to configure the testing engine, i.e., how to set the `--search` flag.
+The README of the `fd-action-policy-testing` sub-module describes how to configure the testing engine, i.e., how to set the `--search` flag.
 
 ## Test Drivers
 
