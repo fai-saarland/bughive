@@ -13,6 +13,9 @@ Please check our [GitHub repository](https://github.com/fai-saarland/bughive) fo
 How the different components can be built is described in the following sections.
 We only support Linux.
 
+It may also be helpful to have a look at the provided `Dockerfile`.
+In case you just want to use the software without building it yourself, you can pull the respective docker image from our [docker hub repository](https://hub.docker.com/repository/docker/janeisenhut/bughive).
+
 ## cpddl ASNets
 
 ASNets policy server based on the cpddl implementation requires
