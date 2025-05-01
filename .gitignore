@@ -15,4 +15,8 @@ test/test_*
 python/msg/
 env/
 asnets
+eigen*
 .idea
+benchmarks
+tmp
+lab

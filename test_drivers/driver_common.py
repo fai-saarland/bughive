@@ -80,7 +80,7 @@ def run_driver(server_command, args):
                     server_process.terminate()
                     sys.exit(4)
                 print("Starting FD process", flush=True)
-                fd_process = subprocess.run([args.downward, "--remote-policy", f"localhost:{port}", "--search", args.search],
+                fd_process = subprocess.run([args.downward, "--remote-policy", f"127.0.0.1:{port}", "--search", args.search],
                                             timeout=args.timeout, preexec_fn=set_fd_mem_limit)
                 return_code = fd_process.returncode
                 print(f"FD process terminated with return code {return_code}", flush=True)

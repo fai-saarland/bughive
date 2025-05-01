@@ -45,13 +45,16 @@ static int reqFDROperatorsProb(const int *state,
     return st;
 }
 
+void print_usage(const char* name) {
+    fprintf(stderr, "Usage: %s URL model.policy domain.pddl problem.pddl [options: --verbose | --enable-gpu | --enable-autobatching]\n", name);
+    fprintf(stderr, "\n");
+    fprintf(stderr, "See https://grpc.github.io/grpc/cpp/md_doc_naming.html for how to specify URL.\n");
+}
+
 int main(int argc, char *argv[])
 {
-    if (argc != 5){
-        fprintf(stderr, "Usage: %s URL model.policy domain.pddl problem.pddl\n", argv[0]);
-        fprintf(stderr, "\n");
-        fprintf(stderr, "See https://grpc.github.io/grpc/cpp/md_doc_naming.html"
-                        " for how to specify URL.\n");
+    if (argc < 5){
+        print_usage(argv[0]);
         exit(-1);
     }
 
@@ -59,6 +62,24 @@ int main(int argc, char *argv[])
     const char *policy_file = argv[2];
     const char *domain_file = argv[3];
     const char *problem_file = argv[4];
+
+    asnets_gpu_enabled = 0;
+    for (int i = 5; i < argc; ++i) {
+        if(strcmp(argv[i], "--verbose") == 0) {
+            asnets_verbosity = 1;
+        }
+        else if(strcmp(argv[i], "--enable-gpu") == 0) {
+            asnets_gpu_enabled = 1;
+        }
+        else if(strcmp(argv[i], "--enable-autobatching") == 0) {
+            asnets_autobatching_enabled = 1;
+        }
+        else {
+            fprintf(stderr, "Unknown option %s\n", argv[i]);
+            print_usage(argv[0]);
+            exit(-1);
+        }
+    }
 
     pddlErrInit(&err);
     pddlErrLogEnable(&err, stdout);

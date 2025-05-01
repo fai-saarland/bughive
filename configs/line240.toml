@@ -1,0 +1,40 @@
+[asnets]
+#
+# The following defines the input planning tasks:
+#
+root = "__PWD__"
+domain = "domain.pddl"
+train_problems = [ "train" ]
+hidden_dimension = 16
+num_layers = 2
+random_seed = 1000
+weight_decay = 0.000200
+dropout_rate = 0.100000
+batch_size = 64
+double_batch_size_every_epoch = 0
+max_train_epochs = 60
+max_overall_train_epochs = 240
+num_init_policies = 4
+min_epochs = 60
+advanced_training = true
+use_testing = true
+wait_for_test_results = true
+train_steps = 700
+policy_rollout_limit = 1000
+teacher_timeout = 10.000000
+early_termination_success_rate = 0.999000
+early_termination_epochs = 20
+train_num_random_walks = 0
+train_random_walk_max_steps = 5
+lmc = false
+op_history = false
+teacher = "astar-lmcut" # must be one of "astar-lmcut", "external-fd"
+#testing_submit_cmd = ["/bin/bash", "condor-submit.sh"]
+#testing_query_cmd = ["/bin/bash", "query.sh"]
+testing_cmd = ["/bin/bash", "condor-test.sh"]
+osp_all_soft_goals = false
+asnets_verbosity = 0
+wait_for_all_test_results = true
+wait_time_test_results = 1000000
+gpu_enabled = false
+autobatching_enabled = false
