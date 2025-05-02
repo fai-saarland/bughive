@@ -64,7 +64,7 @@ After each training epoch a `.stats` file is generated. It contains the rankings
 
 ### Testing Final Policies
 
-For running policy testing on the final policies (on the test set), we recommend using the provided ASNets test driver (see `./test_drivers/asnets_test_driver.py --help').
+For running policy testing on the final policies (on the test set), we recommend using the provided ASNets test driver (see `./test_drivers/asnets_test_driver.py --help`).
 
 We precomputed pools and simulation files. The search configuration for the oracle step is:
 
