@@ -1,0 +1,8 @@
+Checks:          '-*,clang-analyzer-*,modernize-*,performance-*,readability-*'
+WarningsAsErrors: 'modernize-*'
+FormatStyle:     'file'  # Use existing .clang-format file, if present
+CheckOptions:
+  - key:           'modernize-use-nullptr.NullMacros'
+    value:         'false'
+  - key:           'clang-analyzer-core.CallAndMessage'
+    value:         'true'
